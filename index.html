@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Goops</title>
+  <style>
+    :root {
+      --saddle-brown: #855030;
+      --dark-walnut: #652e0e;
+    }
+
+    body {
+      background-color: #14100d;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+
+    #ui {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #201712;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    #class-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 15px 0;
+    }
+
+    #class-buttons button {
+      background-color: var(--dark-walnut);
+      color: white;
+      border: 1px solid var(--saddle-brown);
+      padding: 10px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+
+    #class-buttons button:hover {
+      background-color: var(--saddle-brown);
+    }
+
+    #class-buttons button.selected {
+      background-color: var(--saddle-brown);
+      border-color: #c98456;
+      color: #ffffff;
+      font-weight: bold;
+    }
+
+    .action-group {
+      margin: 15px 0;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid var(--dark-walnut);
+      background: #2b1f18;
+      color: #fff;
+      width: 180px;
+      text-align: center;
+      font-size: 16px;
+      letter-spacing: 2px;
+    }
+
+    .btn-action {
+      padding: 10px 20px;
+      border-radius: 4px;
+      border: none;
+      background-color: var(--saddle-brown);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 5px;
+    }
+
+    .btn-action:hover {
+      background-color: var(--dark-walnut);
+    }
+
+    #server-banner {
+      margin: 10px 0 5px;
+      padding: 12px;
+      background: #241a14;
+      border-radius: 4px;
+      border-left: 4px solid var(--saddle-brown);
+    }
+
+    #server-banner h2 {
+      margin: 0 0 6px;
+      color: #c98456;
+    }
+
+    #server-banner p {
+      margin: 4px 0;
+    }
+
+    #server-motd {
+      color: #d9c3b3;
+      font-style: italic;
+    }
+
+    #server-browser {
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    #server-browser h3 {
+      text-align: center;
+    }
+
+    #server-list {
+      margin: 10px 0;
+      color: #d9c3b3;
+    }
+
+    .server-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      margin: 6px 0;
+      background: #241a14;
+      border-radius: 4px;
+      border-left: 4px solid var(--saddle-brown);
+    }
+
+    .server-row-text {
+      min-width: 0;
+      word-break: break-word;
+    }
+
+    #server-browser .server-actions {
+      text-align: center;
+    }
+
+    #status-container {
+      margin-top: 15px;
+      padding: 12px;
+      background: #241a14;
+      border-radius: 4px;
+      border-left: 4px solid var(--saddle-brown);
+      font-family: monospace;
+      font-size: 15px;
+      word-break: break-all;
+    }
+
+    #gameCanvas {
+      background-color: #1c130d;
+      border: 2px solid var(--dark-walnut);
+      border-radius: 6px;
+      margin: 20px auto;
+      display: none;
+    }
+
+    #host-code-badge {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #201712;
+      border: 2px solid var(--saddle-brown);
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-family: monospace;
+      font-size: 20px;
+      letter-spacing: 3px;
+      color: #c98456;
+      z-index: 10;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    #round-timer-badge {
+      display: none;
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      background: #201712;
+      border: 2px solid var(--saddle-brown);
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-family: monospace;
+      font-size: 20px;
+      letter-spacing: 1px;
+      color: #c98456;
+      z-index: 10;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    }
+  </style>
+
+  <!-- Socket.io client (served automatically by the socket.io server at this path) -->
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+
+  <div id="ui">
+    <h1>Goops</h1>
+
+    <!-- Shown only when this server is a community server (see /server-info) -->
+    <div id="server-banner" style="display: none;">
+      <h2 id="server-name"></h2>
+      <p id="server-motd"></p>
+      <p id="server-online"></p>
+    </div>
+
+    <h3>Selected Class: <span id="char-label" style="color: #c98456;">None</span></h3>
+
+    <div id="class-buttons"></div>
+
+    <hr style="border-color: #333; margin: 20px 0;" />
+
+    <div id="community-actions" class="action-group" style="display: none;">
+      <button class="btn-action" onclick="joinServer()">Join Server</button>
+      <button id="back-button" class="btn-action" style="display: none;" onclick="leaveRemoteSelection()">Back</button>
+    </div>
+
+    <div id="main-actions">
+      <div class="action-group">
+        <button class="btn-action" onclick="hostGame()">Host Game</button>
+      </div>
+
+      <div class="action-group">
+        <input
+          type="text"
+          id="host-id-input"
+          placeholder="Room Code"
+          maxlength="10"
+          pattern="[0-9]*"
+          inputmode="numeric"
+        />
+        <button class="btn-action" onclick="joinGame()">Join Game</button>
+      </div>
+    </div>
+
+    <!-- Community servers that have connected to this site (shown only on the main site) -->
+    <div id="server-browser" style="display: none;">
+      <hr style="border-color: #333; margin: 20px 0;" />
+      <h3>Community Servers</h3>
+      <div id="server-list">Loading...</div>
+      <div class="server-actions">
+        <button class="btn-action" onclick="refreshServerList()">Refresh</button>
+      </div>
+      <div class="action-group server-actions">
+        <input
+          type="text"
+          id="server-code-input"
+          placeholder="Server Code"
+          maxlength="6"
+          autocomplete="off"
+          style="text-transform: uppercase;"
+        />
+        <button class="btn-action" onclick="findServerByCode()">Find Server</button>
+      </div>
+    </div>
+
+    <div id="status-container">
+      Status: <span id="status-text">Select a class and click Host or Join</span>
+    </div>
+  </div>
+
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+  <div id="host-code-badge"></div>
+  <div id="round-timer-badge"></div>
+
+  <!-- load_classes.js must load before game.js since game.js references its globals -->
+  <script src="load_classes.js"></script>
+  <script src="game.js"></script>
+  <script src="server_browser.js"></script>
+</body>
+</html>

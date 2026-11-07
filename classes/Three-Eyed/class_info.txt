@@ -1,0 +1,6 @@
+class: Three_Eyed
+attack type: melee
+Range: 60
+Speed: 4
+Damage: 25
+Health: 100

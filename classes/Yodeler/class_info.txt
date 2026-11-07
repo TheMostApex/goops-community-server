@@ -1,0 +1,17 @@
+range: 220
+speed: 3
+damage: 5
+health: 80
+knockback: 80
+
+on_hit:
+  if[distance < 70]
+    sustain damage[victim, damage * 3]
+    knockback[victim, you.knockback * 1.5]
+  else
+    sustain damage[victim]
+    knockback[victim, you.knockback - distance * 0.3]
+  end
+
+  # Your own voice pushes you back a little
+  knockback[you, 12]

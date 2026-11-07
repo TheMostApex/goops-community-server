@@ -1,0 +1,9 @@
+{
+  "name": "My Goops Server",
+  "motd": "Welcome! Click to move, space to attack.",
+  "port": 3000,
+  "maxPlayers": 8,
+  "roundMinutes": 5,
+  "mainSite": "https://goops.wasmer.app",
+  "listed": true
+}

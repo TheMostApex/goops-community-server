@@ -1,0 +1,6 @@
+class: Magician
+attack type: ranged
+Range: 150
+Speed: 4
+Damage: 25
+Health: 100
