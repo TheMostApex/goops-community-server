@@ -9,6 +9,7 @@ let socket = null;
 let myId = null;
 let isHost = false;
 let players = {};
+let props = []; // props in the arena: { id, name, x, y, angle, size }
 let roundTimeRemaining = null;
 let roundOver = false;
 let nextRoundStartsAt = null;
@@ -28,7 +29,7 @@ window.addEventListener('DOMContentLoaded', () => {
             const rect = canvas.getBoundingClientRect();
             return {
                 x: (e.clientX - rect.left) * (canvas.width / rect.width),
-                y: (e.clientY - rect.top) * (canvas.height / rect.height)
+                        y: (e.clientY - rect.top) * (canvas.height / rect.height)
             };
         };
 
@@ -57,6 +58,7 @@ function connectSocket() {
 
     socket.on('state-update', (data) => {
         players = data.players;
+        if (Array.isArray(data.props)) props = data.props.slice(0, 300);
         roundTimeRemaining = data.timeRemaining;
         roundOver = data.roundOver;
         nextRoundStartsAt = data.nextRoundStartsAt || null;
@@ -73,13 +75,13 @@ function connectSocket() {
         if (statusEl) statusEl.innerText = 'Disconnected from server.';
     });
 
-    // Playing on a community server through the main site, and that server went offline.
-    socket.on('server-closed', () => {
-        alert('The server you were playing on went offline.');
-        location.reload();
-    });
+        // Playing on a community server through the main site, and that server went offline.
+        socket.on('server-closed', () => {
+            alert('The server you were playing on went offline.');
+            location.reload();
+        });
 
-    return socket;
+        return socket;
 }
 
 function hostGame() {
@@ -254,6 +256,8 @@ function render() {
         return;
     }
 
+    drawProps(ctx);
+
     for (let id in players) {
         const p = players[id];
 
@@ -318,6 +322,31 @@ function render() {
 
     drawMoveMarker(ctx);
     renderDeathOverlay(ctx, canvas);
+}
+
+// Props are drawn under the players. A community server decides what exists, so the numbers
+// are kept within sensible limits before they are drawn.
+function drawProps(ctx) {
+    for (const prop of props) {
+        const size = Math.min(200, Math.max(2, Number(prop.size) || 16));
+        const asset = loadedProps[prop.name];
+        const sprite = asset && asset.sprite;
+
+        ctx.save();
+        ctx.translate(Number(prop.x) || 0, Number(prop.y) || 0);
+        ctx.rotate(Number(prop.angle) || 0); // like everything else, the right side of the image is its front
+
+        if (sprite && sprite.complete && sprite.naturalWidth !== 0) {
+            const { width, height } = fitWithinBox(sprite, size * 2, size * 2);
+            ctx.drawImage(sprite, -width / 2, -height / 2, width, height);
+        } else {
+            ctx.fillStyle = 'rgba(230, 126, 34, 0.7)';
+            ctx.beginPath();
+            ctx.arc(0, 0, size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.restore();
+    }
 }
 
 // Small ring + cross at the spot you clicked, until you get there.

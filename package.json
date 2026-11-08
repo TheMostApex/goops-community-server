@@ -1,6 +1,6 @@
 {
   "name": "goops-community-server",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Run your own Goops community server",
   "main": "server.js",
   "scripts": {
