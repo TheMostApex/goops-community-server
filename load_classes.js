@@ -5,6 +5,7 @@
 //   loadedClasses, activeClasses, selectedClass
 
 const loadedClasses = {};
+const loadedProps = {}; // prop name -> { sprite, activeSprite }
 let activeClasses = [];
 let selectedClass = '';
 
@@ -25,6 +26,8 @@ async function initLoadoutFromManifest(classesBase = './classes') {
     if (!container || !label) return;
 
     const token = ++loadToken;
+    // Props come from the same place as the classes: ./props, or /s/<code>/props on a community server.
+    loadProps(classesBase.replace(/\/classes$/, '/props'));
     container.innerHTML = '';
     activeClasses.length = 0;
     Object.keys(loadedClasses).forEach((name) => delete loadedClasses[name]);
@@ -118,6 +121,35 @@ async function initLoadoutFromManifest(classesBase = './classes') {
     if (activeClasses.length === 0) return;
 
     finishClassSetup(container, label);
+}
+
+// Loads the sprite for every prop the server has. What a prop does is decided by the server,
+// and its size comes with the game state, so only the image is needed here.
+let propsToken = 0;
+async function loadProps(propsBase) {
+    const token = ++propsToken;
+    Object.keys(loadedProps).forEach((name) => delete loadedProps[name]);
+    try {
+        const res = await fetch(`${propsBase}/list.txt`);
+        if (!res.ok) return;
+        const names = (await res.text())
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line && !line.startsWith('#'))
+        .slice(0, 50);
+        if (token !== propsToken) return;
+
+        for (const name of names) {
+            const sprite = new Image();
+            sprite.src = `${propsBase}/${encodeURIComponent(name)}/prop.png`;
+            // Optional picture shown while the prop is activated. If the file isn't there it is simply never used.
+            const activeSprite = new Image();
+            activeSprite.src = `${propsBase}/${encodeURIComponent(name)}/prop_activate.png`;
+            loadedProps[name] = { sprite, activeSprite };
+        }
+    } catch (err) {
+        // This server has no props.
+    }
 }
 
 function finishClassSetup(container, label) {

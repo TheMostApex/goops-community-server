@@ -65,13 +65,24 @@ Every prop lives in its own folder inside `props/`:
 ```
 props/
   Mine/
-    prop_info.txt    stats, then optional scripts
-    prop.png         the picture
+    prop_info.txt      stats, then optional scripts
+    prop.png           the picture
+    prop_activate.png  optional: the picture while the prop is activated
 ```
 
 Props are found automatically, like classes. There is no list to edit, and refreshing the lobby page picks up new ones. A prop name cannot contain `,` `[` or `]`, and cannot be `this` or `all`. In scripts, names are matched without regard to capital letters, so `place prop[mine]` finds the `Mine` folder.
 
 The right side of `prop.png` is its front. The picture is rotated to face the way the prop was placed or shot, and drawn to fit a square twice the prop's `size` across.
+
+### The activated picture
+
+`prop_activate.png` is optional, and works like `player_attack.png` does for a class. A prop is drawn with it while the prop is **activated**, which means any of these:
+
+- It has an `armdelay` and that delay is over. A mine can show its light switching on once it is armed.
+- A player is touching it. A patch of fire can burn hotter while someone stands in it.
+- A player touched it a moment ago. The `activetime` stat sets how long, and it defaults to 0.4 seconds.
+
+If the file is missing, `prop.png` is used all the time. Use the same size as `prop.png`, so the prop doesn't seem to change size when it switches. A prop that is deleted the instant it is touched, like a fireball, never has a chance to show it.
 
 ### Prop stats
 
@@ -83,6 +94,7 @@ The right side of `prop.png` is its front. The picture is rotated to face the wa
 | `lifetime` | Seconds until it expires. 0 means it never does | 0 |
 | `armdelay` | Seconds after appearing before it reacts to anyone touching it | 0 |
 | `stayinterval` | Seconds between `on_stay` runs for a player standing on it (0.1 or more) | 0.5 |
+| `activetime` | Seconds `prop_activate.png` stays up after a player touches the prop (0 to 60) | 0.4 |
 | `touchowner` | `yes` if the player who placed it can also set it off. By default they cannot | no |
 | `walls` | What happens at the edge of the arena: `vanish` (removed), `stop` or `bounce` | vanish |
 | `damage`, `knockback` | The default amounts for `sustain damage[...]` and `knockback[...]` inside this prop's scripts | the owner's |

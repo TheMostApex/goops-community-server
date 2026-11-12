@@ -485,6 +485,7 @@ function describeProp(name, stats, hooks) {
         lifetimeMs: clampNumber(stats.lifetime, 0, 0, 3600) * 1000,
         armMs: clampNumber(stats.armdelay, 0, 0, 60) * 1000,
         stayMs: clampNumber(stats.stayinterval, 0.5, 0.1, 60) * 1000,
+        activeMs: clampNumber(stats.activetime, 0.4, 0, 60) * 1000, // how long prop_activate.png stays up after a touch
         touchOwner: truthy(stats.touchowner),
         walls: WALL_MODES.includes(walls) ? walls : 'vanish'
     };
@@ -676,6 +677,9 @@ function startScript(room, script, parts) {
 }
 
 function runPropHook(room, prop, hookName, victim) {
+    if (hookName === 'on_touch' || hookName === 'on_stay') {
+        prop.activeUntil = (room.tickNow || Date.now()) + prop.def.activeMs;
+    }
     startScript(room, prop.def.hooks[hookName], { you: prop.owner, victim, prop, label: `prop ${prop.name}` });
 }
 
@@ -705,6 +709,7 @@ function spawnProp(room, def, x, y, angle, vx, vy, owner) {
         armedAt: now + def.armMs,
         touching: new Set(),   // players currently standing on it
         nextStay: new Map(),   // player -> when on_stay may run for them again
+        activeUntil: 0,        // prop_activate.png is shown until this time
         removed: false
     };
     room.props.set(prop.id, prop);
@@ -900,17 +905,26 @@ function runTasks(room, now) {
     }
 }
 
+// "Activated" props are drawn with prop_activate.png: ones with an armdelay once it is over,
+// ones a player is touching, and ones touched a moment ago.
+function isPropActive(prop, now) {
+    return (prop.def.armMs > 0 && now >= prop.armedAt) || prop.touching.size > 0 || now < prop.activeUntil;
+}
+
 function propsForClient(room) {
+    const now = Date.now();
     const out = [];
     for (const prop of room.props.values()) {
-        out.push({
+        const entry = {
             id: prop.id,
             name: prop.name,
             x: Math.round(prop.x * 10) / 10,
-                 y: Math.round(prop.y * 10) / 10,
-                 angle: Math.round(prop.angle * 100) / 100,
-                 size: prop.size
-        });
+            y: Math.round(prop.y * 10) / 10,
+            angle: Math.round(prop.angle * 100) / 100,
+            size: prop.size
+        };
+        if (isPropActive(prop, now)) entry.active = true;
+        out.push(entry);
     }
     return out;
 }

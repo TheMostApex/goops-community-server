@@ -1,0 +1,20 @@
+size: 12
+speed: 13
+lifetime: 0.5
+walls: vanish
+
+on_touch:
+  # 1. Deal base electrical damage to the primary target
+  sustain damage[victim, 10]
+
+  # 2. Stun/Knockback effect (push back and interrupt)
+  knockback[victim, 35]
+
+  # 3. Chain arc to nearby enemies within 120 pixels
+  blast[120]
+    sustain damage[victim, 8]
+    knockback[victim, 15]
+  end
+
+  # Remove the primary arc after hit
+  delete prop[this]

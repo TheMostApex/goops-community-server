@@ -1,7 +1,7 @@
-range: 220
-speed: 3
-damage: 5
-health: 80
+range: 150
+speed: 2
+damage: 8
+health: 70
 knockback: 80
 
 on_hit:
@@ -12,6 +12,4 @@ on_hit:
     sustain damage[victim]
     knockback[victim, you.knockback - distance * 0.3]
   end
-
-  # Your own voice pushes you back a little
   knockback[you, 12]

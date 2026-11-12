@@ -330,7 +330,10 @@ function drawProps(ctx) {
     for (const prop of props) {
         const size = Math.min(200, Math.max(2, Number(prop.size) || 16));
         const asset = loadedProps[prop.name];
-        const sprite = asset && asset.sprite;
+        let sprite = asset && asset.sprite;
+        if (prop.active === true && asset && asset.activeSprite && asset.activeSprite.complete && asset.activeSprite.naturalWidth !== 0) {
+            sprite = asset.activeSprite; // activated: armed, being touched, or just touched
+        }
 
         ctx.save();
         ctx.translate(Number(prop.x) || 0, Number(prop.y) || 0);

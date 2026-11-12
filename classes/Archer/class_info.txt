@@ -1,0 +1,9 @@
+attacktype: ranged
+health: 50
+speed: 4
+damage: 0
+range: 0
+
+on_attack:
+  # Shoot the primary arc straight ahead
+  shoot prop[Arrow, 12, 0]

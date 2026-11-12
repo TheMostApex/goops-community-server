@@ -1,0 +1,12 @@
+size: 6
+speed: 9
+drag: 0
+lifetime: 1.5
+walls: vanish
+damage: 25
+knockback: 15
+
+on_touch:
+  sustain damage[victim, this.damage]
+  knockback[victim, this.knockback]
+  delete prop[this]
